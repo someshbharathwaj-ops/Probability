@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STOCHASTIC UNIVERSE — Mathematical Awakening</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #03030a;
+    --deep: #07071a;
+    --ink: #0d0d2b;
+    --plasma: #1a1a4e;
+    --electric: #4040ff;
+    --neon: #00f5ff;
+    --gold: #ffd700;
+    --rose: #ff3366;
+    --sage: #39ff85;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --glow: rgba(64, 64, 255, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* ── STARFIELD CANVAS ── */
+  #cosmos {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    z-index: 10;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    color: var(--neon);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s 0.3s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--neon) 40%, var(--electric) 70%, var(--gold) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    animation: fadeUp 1s 0.6s forwards;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-sub {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: var(--muted);
+    max-width: 600px;
+    opacity: 0;
+    animation: fadeUp 1s 0.9s forwards;
+    margin-bottom: 3rem;
+    line-height: 1.7;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1s 1.2s forwards;
+  }
+
+  .btn {
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--electric);
+    background: transparent;
+    color: var(--neon);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--electric);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .btn:hover { color: #fff; border-color: var(--neon); }
+  .btn:hover::before { transform: translateX(0); }
+
+  .btn-gold {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+  .btn-gold::before { background: var(--gold); }
+  .btn-gold:hover { color: var(--void); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 2rem;
+    background: rgba(3, 3, 10, 0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(64, 64, 255, 0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--neon);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--neon); }
+
+  /* ── SECTION LAYOUT ── */
+  section {
+    position: relative;
+    z-index: 10;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.5em;
+    color: var(--electric);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--electric), transparent);
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-body {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 720px;
+  }
+
+  /* ── PHASE CARDS ── */
+  .phases-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5px;
+    margin-top: 3rem;
+    background: rgba(64, 64, 255, 0.1);
+    border: 1px solid rgba(64, 64, 255, 0.2);
+  }
+
+  .phase-card {
+    background: var(--deep);
+    padding: 2rem;
+    position: relative;
+    transition: background 0.3s;
+    cursor: default;
+  }
+
+  .phase-card:hover { background: var(--plasma); }
+
+  .phase-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 700;
+    font-style: italic;
+    color: rgba(64, 64, 255, 0.15);
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    line-height: 1;
+  }
+
+  .phase-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--neon);
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .phase-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+  }
+
+  .phase-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── LEVEL FLOW ── */
+  .levels-timeline {
+    position: relative;
+    margin-top: 4rem;
+  }
+
+  .levels-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--electric), var(--rose), var(--gold));
+  }
+
+  .level-item {
+    display: flex;
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+    padding-left: 0.5rem;
+  }
+
+  .level-dot {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid var(--electric);
+    background: var(--void);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--electric);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+    transition: all 0.3s;
+  }
+
+  .level-item:hover .level-dot {
+    background: var(--electric);
+    color: #fff;
+    box-shadow: 0 0 20px var(--electric);
+  }
+
+  .level-content { flex: 1; }
+
+  .level-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+
+  .level-desc {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+  }
+
+  .topic-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .pill {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid rgba(64, 64, 255, 0.4);
+    color: var(--electric);
+    border-radius: 0;
+  }
+
+  .pill-neon { border-color: rgba(0, 245, 255, 0.4); color: var(--neon); }
+  .pill-gold { border-color: rgba(255, 215, 0, 0.4); color: var(--gold); }
+  .pill-rose { border-color: rgba(255, 51, 102, 0.4); color: var(--rose); }
+  .pill-sage { border-color: rgba(57, 255, 133, 0.4); color: var(--sage); }
+
+  /* ── DEMO: LIVE SIMULATION ── */
+  .sim-container {
+    background: var(--deep);
+    border: 1px solid rgba(64, 64, 255, 0.2);
+    padding: 2rem;
+    margin-top: 3rem;
+  }
+
+  .sim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .sim-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--neon);
+    text-transform: uppercase;
+  }
+
+  .sim-controls {
+    display: flex;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--electric);
+    background: transparent;
+    color: var(--electric);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover, .ctrl-btn.active {
+    background: var(--electric);
+    color: #fff;
+  }
+
+  .ctrl-btn.active-rose {
+    background: var(--rose);
+    border-color: var(--rose);
+    color: #fff;
+  }
+
+  #sim-canvas {
+    width: 100%;
+    height: 320px;
+    display: block;
+  }
+
+  .sim-legend {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  /* ── MONSTER PROBLEM ── */
+  .monster-box {
+    background: linear-gradient(135deg, rgba(255, 51, 102, 0.05), rgba(255, 215, 0, 0.05));
+    border: 1px solid rgba(255, 51, 102, 0.3);
+    padding: 2.5rem;
+    margin-top: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .monster-box::before {
+    content: 'GOD PROBLEM';
+    position: absolute;
+    top: -0.5rem;
+    right: 2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.4em;
+    color: var(--rose);
+    background: var(--void);
+    padding: 0 0.5rem;
+  }
+
+  .monster-box::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 20px,
+      rgba(255, 51, 102, 0.02) 20px,
+      rgba(255, 51, 102, 0.02) 21px
+    );
+    pointer-events: none;
+  }
+
+  .monster-problem {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+  }
+
+  .solution-steps {
+    margin-top: 1.5rem;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1.2rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-style: italic;
+    color: var(--gold);
+    line-height: 1;
+    width: 2rem;
+    text-align: center;
+  }
+
+  .step-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--rose);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .step-content {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .step-content .math-highlight {
+    color: var(--neon);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.82rem;
+  }
+
+  /* ── AUTOCORRELATION VIZ ── */
+  #acf-canvas {
+    width: 100%;
+    height: 280px;
+    display: block;
+  }
+
+  /* ── ARCHITECTURE ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px;
+    background: rgba(64, 64, 255, 0.1);
+    margin-top: 3rem;
+    border: 1px solid rgba(64, 64, 255, 0.2);
+  }
+
+  .arch-card {
+    background: var(--deep);
+    padding: 1.8rem;
+    transition: background 0.3s;
+  }
+
+  .arch-card:hover { background: var(--plasma); }
+
+  .arch-icon {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .arch-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
+
+  .arch-card-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── POISSON SIMULATOR ── */
+  #poisson-canvas {
+    width: 100%;
+    height: 200px;
+    display: block;
+  }
+
+  .poisson-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(64, 64, 255, 0.1);
+    margin-top: 1px;
+  }
+
+  .stat-box {
+    background: var(--deep);
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-val {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  /* ── ROADMAP ── */
+  .roadmap-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .roadmap-phase {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--electric);
+    text-transform: uppercase;
+    padding-top: 0.2rem;
+  }
+
+  .roadmap-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .roadmap-item {
+    font-size: 0.85rem;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    line-height: 1.5;
+  }
+
+  .roadmap-item::before {
+    content: '→';
+    color: var(--electric);
+    flex-shrink: 0;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── QUOTE BOX ── */
+  .quote-box {
+    border-left: 2px solid var(--gold);
+    padding: 1.5rem 2rem;
+    margin: 3rem 0;
+    background: rgba(255, 215, 0, 0.03);
+  }
+
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 0.8rem;
+  }
+
+  .quote-attr {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    position: relative;
+    z-index: 10;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(64, 64, 255, 0.4), transparent);
+    margin: 0 2rem;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid rgba(64, 64, 255, 0.1);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .pulse { animation: pulse 2s infinite; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--void); }
+  ::-webkit-scrollbar-thumb { background: var(--electric); }
+
+  /* ── INSIGHT BOX ── */
+  .insight {
+    background: rgba(0, 245, 255, 0.05);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    font-size: 0.85rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .insight-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    color: var(--neon);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* slider */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 120px;
+    height: 2px;
+    background: var(--electric);
+    outline: none;
+    cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--neon);
+    cursor: pointer;
+  }
+
+  .slider-row {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+  }
+  .slider-val { color: var(--neon); min-width: 2rem; }
+
+  @media (max-width: 600px) {
+    .nav-links { display: none; }
+    .poisson-stats { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cosmos"></canvas>
+
+<nav>
+  <div class="nav-logo">∿ Stochastic Universe</div>
+  <ul class="nav-links">
+    <li><a href="#philosophy">Philosophy</a></li>
+    <li><a href="#levels">Levels</a></li>
+    <li><a href="#simulation">Simulation</a></li>
+    <li><a href="#monster">God Problem</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <p class="hero-eyebrow">Cognitive Transformation System · v∞</p>
+  <h1 class="hero-title">Stochastic<br>Universe</h1>
+  <p class="hero-sub">Where randomness becomes geometry, uncertainty becomes intuition, and probability becomes a living organism evolving through time.</p>
+  <div class="hero-cta">
+    <a href="#simulation" class="btn">Enter the Universe</a>
+    <a href="#monster" class="btn btn-gold">View God Problem</a>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- PHILOSOPHY -->
+<section id="philosophy">
+  <p class="section-label">Learning Architecture</p>
+  <h2 class="section-title">Six Phases of<br>Mathematical Awakening</h2>
+  <p class="section-body">Not a curriculum. A cognitive initiation ritual. Each phase is engineered to rewire how you perceive uncertainty, structure, and randomness—until they feel as natural as breathing.</p>
+
+  <div class="phases-grid">
+    <div class="phase-card">
+      <span class="phase-number">I</span>
+      <p class="phase-tag">Phase One</p>
+      <h3 class="phase-name">Perception</h3>
+      <p class="phase-desc">You must <em>see</em> randomness first. Simulations before symbols. Your brain builds a physical intuition before formalism is introduced. Particles before equations.</p>
+    </div>
+    <div class="phase-card">
+      <span class="phase-number">II</span>
+      <p class="phase-tag">Phase Two</p>
+      <h3 class="phase-name">Concept Birth</h3>
+      <p class="phase-desc">Why does this concept exist? You must <em>feel</em> the need before the definition arrives. Mathematical objects are invented by suffering—witness that suffering first.</p>
+    </div>
+    <div class="phase-card">
+      <span class="phase-number">III</span>
+      <p class="phase-tag">Phase Three</p>
+      <h3 class="phase-name">Mathematical Structuring</h3>
+      <p class="phase-desc">Now formalism lands on fertile soil. Definitions crystallize intuitions you already possess. Theorems feel inevitable, not arbitrary. Proofs become journeys with known destinations.</p>
+    </div>
+    <div class="phase-card">
+      <span class="phase-number">IV</span>
+      <p class="phase-tag">Phase Four</p>
+      <h3 class="phase-name">Concept Fusion</h3>
+      <p class="phase-desc">Multiple ideas collide. You discover they were the same idea wearing different faces. This is where mathematical maturity lives—in the recognition of deep connections.</p>
+    </div>
+    <div class="phase-card">
+      <span class="phase-number">V</span>
+      <p class="phase-tag">Phase Five</p>
+      <h3 class="phase-name">Monster Challenge</h3>
+      <p class="phase-desc">Problems that feel impossible. Then, after one moment of insight, feel inevitable. This is the difference between a student and a researcher: comfort with apparent impossibility.</p>
+    </div>
+    <div class="phase-card">
+      <span class="phase-number">VI</span>
+      <p class="phase-tag">Phase Six</p>
+      <h3 class="phase-name">Reflection</h3>
+      <p class="phase-desc">Mental compression. The cheat sheet is not for memorization—it is proof that you have compressed complexity into single lines. A mark of genuine understanding.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LEVELS -->
+<section id="levels">
+  <p class="section-label">Learning Universe Design</p>
+  <h2 class="section-title">The Journey from<br>Zero to Research-Grade</h2>
+  <p class="section-body">Five levels, each a complete world. Each world contains its own simulations, intuition anchors, and at least one monster problem that combines everything learned.</p>
+
+  <div class="levels-timeline">
+    <div class="level-item">
+      <div class="level-dot">∅</div>
+      <div class="level-content">
+        <h3 class="level-title">Zero Level — The Birth of Probability</h3>
+        <p class="level-desc">Probability invented from scratch. We begin with <em>uncertainty</em> as a geometric object. Expectation as the center of mass of a probability cloud. Variance as the energy of that cloud's trembling. Chebyshev as the universal law of concentration.</p>
+        <div class="topic-pills">
+          <span class="pill">Randomness Geometry</span>
+          <span class="pill">Measure of Ignorance</span>
+          <span class="pill pill-neon">Expectation Balance</span>
+          <span class="pill pill-neon">Variance Energy</span>
+          <span class="pill pill-gold">Chebyshev Bound</span>
+          <span class="pill">Distribution Shape</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="level-item">
+      <div class="level-dot">1</div>
+      <div class="level-content">
+        <h3 class="level-title">Level I — Probability in Higher Dimensions</h3>
+        <p class="level-desc">Probability breaks free into \(\mathbb{R}^n\). Joint distributions as mountain landscapes. Conditional probability as slicing those mountains. Independence as orthogonality—two variables knowing nothing of each other.</p>
+        <div class="topic-pills">
+          <span class="pill">Joint Density Mountains</span>
+          <span class="pill pill-rose">Marginal Integration</span>
+          <span class="pill">Conditional Slicing</span>
+          <span class="pill pill-neon">Independence Geometry</span>
+          <span class="pill pill-gold">Transformation Theory</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="level-item">
+      <div class="level-dot">2</div>
+      <div class="level-content">
+        <h3 class="level-title">Level II — The Birth of a Random Process</h3>
+        <p class="level-desc">A random variable is a snapshot. A random process is a living entity evolving through time. An ensemble of possible universes. The mean function is the process's heartbeat. The variance cloud is its uncertainty body.</p>
+        <div class="topic-pills">
+          <span class="pill pill-sage">Ensemble Animation</span>
+          <span class="pill">Sample Functions</span>
+          <span class="pill pill-neon">Mean Field</span>
+          <span class="pill">Variance Cloud</span>
+          <span class="pill pill-gold">Process as Organism</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="level-item">
+      <div class="level-dot">3</div>
+      <div class="level-content">
+        <h3 class="level-title">Level III — The Core of Random Processes</h3>
+        <p class="level-desc">Stationarity. Autocorrelation. Power Spectral Density. The Poisson Process. These are not definitions to memorize—they are tools for understanding how randomness organizes itself across time and frequency.</p>
+        <div class="topic-pills">
+          <span class="pill">Strict Stationarity</span>
+          <span class="pill pill-neon">Wide Sense Stationary</span>
+          <span class="pill pill-rose">Autocorrelation</span>
+          <span class="pill pill-gold">Wiener-Khinchin</span>
+          <span class="pill">Poisson Universe</span>
+          <span class="pill pill-sage">PSD Spectrum</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="level-item">
+      <div class="level-dot">∞</div>
+      <div class="level-content">
+        <h3 class="level-title">Research Frontier — Unseen Problems</h3>
+        <p class="level-desc">No textbook problems. Problems that require you to invent notation, combine concepts across levels, and derive results that feel like small theorems. The mark of a mathematical mind that has truly transformed.</p>
+        <div class="topic-pills">
+          <span class="pill pill-rose">Cross-Level Synthesis</span>
+          <span class="pill pill-gold">Derivation from First Principles</span>
+          <span class="pill pill-neon">Research Reasoning</span>
+          <span class="pill">Hidden Structure</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SIMULATION -->
+<section id="simulation">
+  <p class="section-label">Live Interactive Simulation</p>
+  <h2 class="section-title">Random Processes —<br>The Living Organism</h2>
+  <p class="section-body">Below is a real-time ensemble of sample functions. Each colored path is one possible universe—one realization of the process. The white band is the mean ± one standard deviation. Watch randomness organize itself.</p>
+
+  <div class="sim-container">
+    <div class="sim-header">
+      <p class="sim-title">∿ Ensemble Visualizer</p>
+      <div class="sim-controls">
+        <button class="ctrl-btn active" id="btn-wiener" onclick="setMode('wiener')">Wiener</button>
+        <button class="ctrl-btn" id="btn-osc" onclick="setMode('osc')">Oscillator</button>
+        <button class="ctrl-btn" id="btn-poisson" onclick="setMode('poisson')">Poisson</button>
+        <button class="ctrl-btn active-rose" id="btn-pause" onclick="togglePause()">⏸</button>
+      </div>
+    </div>
+    <canvas id="sim-canvas"></canvas>
+    <div class="sim-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(0,245,255,0.5)"></div>Sample realizations</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#fff"></div>Mean function μ(t)</div>
+      <div class="legend-item"><div class="legend-dot" style="background:rgba(255,215,0,0.4)"></div>±σ uncertainty band</div>
+    </div>
+  </div>
+
+  <!-- ACF VISUALIZER -->
+  <div class="sim-container" style="margin-top:1.5rem;">
+    <div class="sim-header">
+      <p class="sim-title">∿ Autocorrelation R(τ) — Real-Time Decay</p>
+      <div class="sim-controls">
+        <div class="slider-row">
+          <span>λ</span>
+          <input type="range" id="lambda-slider" min="1" max="20" value="5" oninput="updateLambda(this.value)">
+          <span class="slider-val" id="lambda-val">5</span>
+        </div>
+        <div class="slider-row">
+          <span>ω₀</span>
+          <input type="range" id="omega-slider" min="1" max="30" value="10" oninput="updateOmega(this.value)">
+          <span class="slider-val" id="omega-val">10</span>
+        </div>
+      </div>
+    </div>
+    <canvas id="acf-canvas"></canvas>
+    <div class="insight">
+      <p class="insight-label">⚡ Intuition</p>
+      The autocorrelation <span class="math-highlight">R(τ) = E[X(t)X(t+τ)]</span> measures how much the process remembers its own past. When τ=0 it equals the total power. As τ→∞, memory fades—decorrelation is forgetting. The oscillatory decay you see is the signature of a damped harmonic random process: a physical system being driven by noise.
+    </div>
+  </div>
+
+  <!-- POISSON -->
+  <div class="sim-container" style="margin-top:1.5rem;">
+    <div class="sim-header">
+      <p class="sim-title">∿ Poisson Event Universe</p>
+      <div class="sim-controls">
+        <div class="slider-row">
+          <span>rate λ</span>
+          <input type="range" id="poisson-rate" min="1" max="15" value="4" oninput="updatePoissonRate(this.value)">
+          <span class="slider-val" id="poisson-rate-val">4</span>
+        </div>
+        <button class="ctrl-btn" onclick="resetPoisson()">Reset</button>
+      </div>
+    </div>
+    <canvas id="poisson-canvas"></canvas>
+    <div class="poisson-stats">
+      <div class="stat-box">
+        <p class="stat-label">Events N(t)</p>
+        <p class="stat-val" id="stat-events">0</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-label">E[N(t)] = λt</p>
+        <p class="stat-val" id="stat-expected">0</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-label">Var[N(t)] = λt</p>
+        <p class="stat-val" id="stat-var">0</p>
+      </div>
+      <div class="stat-box">
+        <p class="stat-label">Ratio E/Var</p>
+        <p class="stat-val" id="stat-ratio">—</p>
+      </div>
+    </div>
+    <div class="insight" style="margin-top:1.5rem;">
+      <p class="insight-label">⚡ The Deep Fact</p>
+      The Poisson process has a beautiful property: its mean equals its variance — both equal λt. This is not a coincidence; it is the defining character of Poisson randomness. When you see a counting process where the "noise energy" equals the "average level," you are witnessing Poisson structure.
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MONSTER PROBLEM -->
+<section id="monster">
+  <p class="section-label">God-Level Problem · Level III</p>
+  <h2 class="section-title">The Monster Problem:<br>When All Concepts Collide</h2>
+  <p class="section-body">This problem integrates stationarity, autocorrelation, PSD, and the Chebyshev bound. It initially appears underdetermined. The insight is that the constraints are stronger than they first appear.</p>
+
+  <div class="monster-box">
+    <div class="monster-problem">
+      <strong>Problem.</strong> Let \(X(t)\) be a wide-sense stationary (WSS) random process with autocorrelation function:
+      \[ R_X(\tau) = \sigma^2 e^{-\lambda|\tau|}\cos(\omega_0 \tau) \]
+      
+      <br><strong>(a)</strong> Without computing any transform, argue from first principles why \(R_X(\tau)\) is a <em>valid</em> autocorrelation function.<br><br>
+      
+      <strong>(b)</strong> A "filtered" version of \(X(t)\) is defined as:
+      \[ Y(t) = X(t) - \alpha X(t - t_0) \]
+      for constants \(\alpha \in \mathbb{R}\) and \(t_0 > 0\). Determine all values of \(\alpha\) and \(t_0\) such that \(Y(t)\) has <em>zero power at the origin</em> of its PSD, i.e., \(S_Y(0) = 0\).<br><br>
+      
+      <strong>(c)</strong> For the specific case \(\omega_0 = \lambda\), use the Chebyshev inequality to bound the probability that \(|Y(t)| \geq k\sigma\) for a given \(k > 0\), expressing your bound in terms of \(\alpha\), \(k\), \(\lambda\), and \(t_0\).<br><br>
+      
+      <strong>(d)</strong> <em>Conceptual twist</em>: A colleague claims that if \(R_Y(0) = 0\), then \(Y(t) = 0\) almost surely. Is this correct? Prove or disprove.
+    </div>
+
+    <div class="solution-steps">
+      <div class="step">
+        <div class="step-num">①</div>
+        <div>
+          <p class="step-label">Intuition First — What Does Validity Mean?</p>
+          <p class="step-content">A function is a valid autocorrelation if and only if it is <span class="math-highlight">symmetric</span> (since \(R(\tau) = R(-\tau)\)) and <span class="math-highlight">positive semi-definite</span>. The second condition means: for any set of times \(t_1,...,t_n\), the matrix \([R(t_i-t_j)]\) has non-negative eigenvalues. Rather than verify this algebraically, observe: \(R_X(\tau) = \sigma^2 e^{-\lambda|\tau|}\cos(\omega_0\tau)\) is the real part of \(\sigma^2 e^{-(\lambda - i\omega_0)|\tau|}\). Its PSD (via Wiener-Khinchin) must be non-negative for it to be valid. We verify this in step ②.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">②</div>
+        <div>
+          <p class="step-label">Compute the PSD via Wiener-Khinchin</p>
+          <p class="step-content">
+            \[ S_X(f) = \int_{-\infty}^{\infty} R_X(\tau) e^{-j2\pi f\tau} d\tau \]
+            Using the Fourier pair \(e^{-\lambda|\tau|} \leftrightarrow \frac{2\lambda}{\lambda^2 + (2\pi f)^2}\) and the frequency shift property:
+            \[ S_X(f) = \frac{\sigma^2\lambda}{\lambda^2 + (2\pi f - \omega_0)^2} + \frac{\sigma^2\lambda}{\lambda^2 + (2\pi f + \omega_0)^2} \]
+            This is a sum of two Lorentzians — <em>clearly non-negative for all \(f\)</em>. Validity confirmed. The physical meaning: this is the spectrum of a damped oscillator driven by white noise, centered at \(\pm\omega_0/2\pi\) with bandwidth \(\lambda\).
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">③</div>
+        <div>
+          <p class="step-label">Part (b) — Zero Power at Origin</p>
+          <p class="step-content">
+            First, \(R_Y(\tau) = E[Y(t)Y(t+\tau)]\). Since \(X\) is WSS, \(Y\) is also WSS. Expanding:
+            \[ R_Y(\tau) = (1+\alpha^2)R_X(\tau) - \alpha R_X(\tau+t_0) - \alpha R_X(\tau - t_0) \]
+            The PSD of \(Y\) is: \(S_Y(f) = |1 - \alpha e^{-j2\pi f t_0}|^2 S_X(f)\)
+            <br>Setting \(S_Y(0) = 0\): we need \(|1 - \alpha e^0|^2 = 0\), i.e., \(\alpha = 1\). 
+            <br><em>The insight</em>: the condition \(S_Y(0)=0\) forces \(\alpha = 1\) for <em>any</em> \(t_0 > 0\). The filter \(Y(t) = X(t) - X(t-t_0)\) is a differencing operation that removes the DC component — a high-pass filter whose zero is at \(f=0\).
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">④</div>
+        <div>
+          <p class="step-label">Part (c) — Chebyshev with ω₀ = λ</p>
+          <p class="step-content">
+            With \(\alpha = 1\), \(E[Y(t)] = 0\) (inherited from \(X\)). The variance:
+            \[ \text{Var}[Y] = R_Y(0) = 2R_X(0) - 2R_X(t_0) = 2\sigma^2(1 - e^{-\lambda t_0}\cos(\lambda t_0)) \]
+            By Chebyshev: \(P(|Y(t)| \geq k\sigma) \leq \frac{\text{Var}[Y]}{k^2\sigma^2} = \frac{2(1 - e^{-\lambda t_0}\cos(\lambda t_0))}{k^2}\)
+            <br><em>Geometric insight</em>: the bound is tightest when \(e^{-\lambda t_0}\cos(\lambda t_0)\) is maximized, which occurs at \(t_0 = 0\) (trivially, where \(Y=0\)) and has its first positive maximum between \(0\) and \(\pi/\lambda\). The Chebyshev bound measures how much power the differencing operation preserves.
+          </p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num">⑤</div>
+        <div>
+          <p class="step-label">Part (d) — The Conceptual Trap</p>
+          <p class="step-content">
+            The colleague is <strong>wrong</strong>. \(R_Y(0) = E[Y^2(t)] = 0\) implies \(E[Y^2(t)] = 0\), which means \(Y(t) = 0\) <em>in mean square</em>, i.e., almost surely. So the statement is actually <strong>correct</strong>—but the reasoning must be precise: \(E[Z^2] = 0 \Rightarrow Z = 0\) a.s. for any real random variable \(Z\), since \(Z^2 \geq 0\) and its expectation vanishes. 
+            <br><em>The trap</em>: students often confuse "zero autocorrelation at all lags" with "zero second moment." Here, \(R_Y(0) = 0\) alone (not requiring all lags) is sufficient to conclude \(Y(t) = 0\) a.s., because \(R_Y(0)\) IS the second moment.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-box">
+    <p class="quote-text">"The mark of a great mathematical mind is not the ability to memorize theorems, but to see why they could not have been otherwise."</p>
+    <p class="quote-attr">— Learning Philosophy, Stochastic Universe</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <p class="section-label">Technical Architecture</p>
+  <h2 class="section-title">The Engine Behind<br>the Universe</h2>
+  <p class="section-body">Every simulation, animation, and interaction is powered by a modular cognitive architecture designed to maximize insight density per minute of student attention.</p>
+
+  <div class="arch-grid">
+    <div class="arch-card">
+      <div class="arch-icon">🌐</div>
+      <h3 class="arch-card-title">Three.js + WebGL</h3>
+      <p class="arch-card-desc">3D probability landscapes, joint density mountains, and ensemble visualizations rendered at 60fps. Shader-based particle systems for probability mass visualization.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">📊</div>
+      <h3 class="arch-card-title">D3.js Data Engine</h3>
+      <p class="arch-card-desc">Real-time autocorrelation computation, PSD frequency analysis, Poisson event generation. All simulations update live as parameters change.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">∫</div>
+      <h3 class="arch-card-title">MathJax 3</h3>
+      <p class="arch-card-desc">Live LaTeX rendering with step-by-step derivation unfolding. Equations appear progressively, synchronized with explanatory text and simulation states.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">🎬</div>
+      <h3 class="arch-card-title">GSAP Animation</h3>
+      <p class="arch-card-desc">Cinematic transitions between phases. Scroll-triggered concept reveals. Staggered element animations that guide attention without overwhelming cognition.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">🧠</div>
+      <h3 class="arch-card-title">Cognitive Pacing Engine</h3>
+      <p class="arch-card-desc">Tracks reading speed, interaction depth, and problem-attempt count. Dynamically adjusts hint availability and concept reinforcement triggers.</p>
+    </div>
+    <div class="arch-card">
+      <div class="arch-icon">🎯</div>
+      <h3 class="arch-card-title">AI Tutor Layer</h3>
+      <p class="arch-card-desc">Claude API integration for Socratic dialogue. Student asks, AI responds with questions, not answers. Guides reasoning without short-circuiting the insight moment.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ROADMAP -->
+<section id="roadmap">
+  <p class="section-label">Expansion Roadmap</p>
+  <h2 class="section-title">The Evolution of<br>the Universe</h2>
+
+  <div style="margin-top:3rem;">
+    <div class="roadmap-row">
+      <p class="roadmap-phase">Phase Alpha<br><span style="color:var(--muted);font-size:0.55rem;">Months 1-3</span></p>
+      <div class="roadmap-items">
+        <div class="roadmap-item">Complete Zero through Level III with all simulations and one monster problem per topic</div>
+        <div class="roadmap-item">Autocorrelation real-time lab with all standard process types (Wiener, OU, ARMA)</div>
+        <div class="roadmap-item">PSD frequency analyzer with audio sonification of process realizations</div>
+        <div class="roadmap-item">Poisson process universe with spatial (2D) Poisson field visualization</div>
+      </div>
+    </div>
+    <div class="roadmap-row">
+      <p class="roadmap-phase">Phase Beta<br><span style="color:var(--muted);font-size:0.55rem;">Months 4-6</span></p>
+      <div class="roadmap-items">
+        <div class="roadmap-item">Martingale theory module — optional betting process visualization</div>
+        <div class="roadmap-item">Markov chains: transition matrix as a living organism, stationary distribution emergence</div>
+        <div class="roadmap-item">Kalman filter as stochastic process reasoning made computational</div>
+        <div class="roadmap-item">Cross-correlation and coherence — signals talking to each other</div>
+      </div>
+    </div>
+    <div class="roadmap-row">
+      <p class="roadmap-phase">Phase Gamma<br><span style="color:var(--muted);font-size:0.55rem;">Months 7-12</span></p>
+      <div class="roadmap-items">
+        <div class="roadmap-item">AI Tutor: full Socratic mode — student types approach, AI asks exactly the right question</div>
+        <div class="roadmap-item">Research problem generator: procedurally creates novel problems by parameter variation</div>
+        <div class="roadmap-item">Connections module: stochastic processes in neuroscience (spike trains), finance (Itô calculus), AI (diffusion models)</div>
+        <div class="roadmap-item">Collaborative mode: two students solving the same monster problem in real-time</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Stochastic Universe · A Cognitive Transformation System</p>
+  <p style="margin-top:0.5rem;">Built on the pedagogy of Kolmogorov, Wiener, and Feynman · Rendered at the edge of perception</p>
+</footer>
+
+<script>
+/* ════════════════════════════════
+   COSMOS STARFIELD
+════════════════════════════════ */
+(function() {
+  const canvas = document.getElementById('cosmos');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [];
+
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function initStars() {
+    stars = [];
+    for (let i = 0; i < 180; i++) {
+      stars.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: Math.random() * 1.2 + 0.2,
+        a: Math.random(),
+        speed: Math.random() * 0.003 + 0.001,
+        phase: Math.random() * Math.PI * 2
+      });
+    }
+  }
+
+  let t = 0;
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    t += 0.01;
+    stars.forEach(s => {
+      const alpha = s.a * (0.5 + 0.5 * Math.sin(t * s.speed * 100 + s.phase));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200, 210, 255, ${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+
+  resize();
+  initStars();
+  draw();
+  window.addEventListener('resize', () => { resize(); initStars(); });
+})();
+
+/* ════════════════════════════════
+   ENSEMBLE SIMULATION
+════════════════════════════════ */
+const SIM = {
+  canvas: null, ctx: null,
+  W: 0, H: 0,
+  mode: 'wiener',
+  paused: false,
+  t: 0,
+  N: 8, // sample paths
+  dt: 0.016,
+  paths: [],
+  T: 200, // time steps shown
+
+  init() {
+    this.canvas = document.getElementById('sim-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.resetPaths();
+    this.loop();
+    window.addEventListener('resize', () => this.resize());
+  },
+
+  resize() {
+    this.canvas.width = this.canvas.offsetWidth * devicePixelRatio;
+    this.canvas.height = this.canvas.offsetHeight * devicePixelRatio;
+    this.ctx.scale(devicePixelRatio, devicePixelRatio);
+    this.W = this.canvas.offsetWidth;
+    this.H = this.canvas.offsetHeight;
+  },
+
+  resetPaths() {
+    this.paths = [];
+    const colors = [
+      'rgba(0,245,255,0.5)', 'rgba(100,200,255,0.4)', 'rgba(0,200,180,0.4)',
+      'rgba(80,180,255,0.4)', 'rgba(0,150,255,0.35)', 'rgba(50,220,200,0.35)',
+      'rgba(0,180,255,0.3)', 'rgba(100,255,200,0.3)'
+    ];
+    for (let i = 0; i < this.N; i++) {
+      this.paths.push({ vals: Array(this.T).fill(0), color: colors[i % colors.length] });
+    }
+    this.t = 0;
+  },
+
+  step() {
+    if (this.paused) return;
+    this.t++;
+
+    this.paths.forEach((p, i) => {
+      const last = p.vals[p.vals.length - 1];
+      let next;
+
+      if (this.mode === 'wiener') {
+        next = last + (Math.random() - 0.5) * 3;
+      } else if (this.mode === 'osc') {
+        const theta = (this.t * 0.05) + i * 0.3;
+        const noise = (Math.random() - 0.5) * 8;
+        next = 40 * Math.sin(theta) + noise;
+      } else {
+        // AR(1) stationary
+        next = 0.9 * last + (Math.random() - 0.5) * 6;
+      }
+
+      p.vals.shift();
+      p.vals.push(next);
+    });
+  },
+
+  draw() {
+    const { ctx, W, H, paths, T } = this;
+    ctx.clearRect(0, 0, W, H);
+
+    const midY = H / 2;
+    const scaleY = H / 200;
+    const scaleX = W / T;
+
+    // Grid lines
+    ctx.strokeStyle = 'rgba(64,64,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y <= 4; y++) {
+      const py = H * y / 4;
+      ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+    }
+    for (let x = 0; x <= 8; x++) {
+      const px = W * x / 8;
+      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+    }
+
+    // Variance band
+    const means = [];
+    const stds = [];
+    for (let i = 0; i < T; i++) {
+      const vals = paths.map(p => p.vals[i]);
+      const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+      const variance = vals.reduce((a, b) => a + (b - mean) ** 2, 0) / vals.length;
+      means.push(mean);
+      stds.push(Math.sqrt(variance));
+    }
+
+    // Draw variance band
+    ctx.beginPath();
+    for (let i = 0; i < T; i++) {
+      const x = i * scaleX;
+      const y = midY - (means[i] + stds[i]) * scaleY;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    for (let i = T - 1; i >= 0; i--) {
+      const x = i * scaleX;
+      const y = midY - (means[i] - stds[i]) * scaleY;
+      ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(255,215,0,0.06)';
+    ctx.fill();
+
+    // Draw sample paths
+    paths.forEach(p => {
+      ctx.beginPath();
+      p.vals.forEach((v, i) => {
+        const x = i * scaleX;
+        const y = midY - v * scaleY;
+        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    });
+
+    // Draw mean
+    ctx.beginPath();
+    means.forEach((m, i) => {
+      const x = i * scaleX;
+      const y = midY - m * scaleY;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Zero line
+    ctx.beginPath();
+    ctx.moveTo(0, midY); ctx.lineTo(W, midY);
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  },
+
+  loop() {
+    this.step();
+    this.draw();
+    requestAnimationFrame(() => this.loop());
+  }
+};
+
+/* ════════════════════════════════
+   ACF VISUALIZER
+════════════════════════════════ */
+const ACF = {
+  canvas: null, ctx: null,
+  W: 0, H: 0,
+  lambda: 5,
+  omega: 10,
+
+  init() {
+    this.canvas = document.getElementById('acf-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.draw();
+    window.addEventListener('resize', () => { this.resize(); this.draw(); });
+  },
+
+  resize() {
+    this.canvas.width = this.canvas.offsetWidth * devicePixelRatio;
+    this.canvas.height = this.canvas.offsetHeight * devicePixelRatio;
+    this.ctx.scale(devicePixelRatio, devicePixelRatio);
+    this.W = this.canvas.offsetWidth;
+    this.H = this.canvas.offsetHeight;
+  },
+
+  draw() {
+    const { ctx, W, H, lambda, omega } = this;
+    ctx.clearRect(0, 0, W, H);
+
+    const midY = H / 2;
+    const maxTau = 4;
+    const N = 400;
+
+    // Grid
+    ctx.strokeStyle = 'rgba(64,64,255,0.08)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = H * i / 4; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      const x = W * i / 4; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+
+    // Axes labels
+    ctx.font = '10px DM Mono';
+    ctx.fillStyle = 'rgba(136,136,170,0.7)';
+    ctx.fillText('R(τ)', 8, 18);
+    ctx.fillText('τ', W - 16, midY - 6);
+
+    // Zero line
+    ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(W, midY);
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 1; ctx.stroke();
+
+    // Envelope
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const tau = (i / N) * maxTau;
+      const env = Math.exp(-lambda * tau / 10);
+      const y = midY - env * (H / 2 - 20);
+      i === 0 ? ctx.moveTo(i * W / N, y) : ctx.lineTo(i * W / N, y);
+    }
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const tau = (i / N) * maxTau;
+      const env = Math.exp(-lambda * tau / 10);
+      const x = i * W / N;
+      const yPos = midY - env * (H / 2 - 20);
+      const yNeg = midY + env * (H / 2 - 20);
+      if (i === 0) ctx.moveTo(x, yPos); else ctx.lineTo(x, yPos);
+      if (i === N) {
+        ctx.lineTo(x, yNeg);
+        for (let j = N; j >= 0; j--) {
+          const tau2 = (j / N) * maxTau;
+          const e2 = Math.exp(-lambda * tau2 / 10);
+          ctx.lineTo(j * W / N, midY + e2 * (H / 2 - 20));
+        }
+      }
+    }
+    ctx.fillStyle = 'rgba(0,245,255,0.04)';
+    ctx.fill();
+
+    // ACF curve
+    ctx.beginPath();
+    for (let i = 0; i <= N; i++) {
+      const tau = (i / N) * maxTau;
+      const r = Math.exp(-lambda * tau / 10) * Math.cos(omega * tau / 10);
+      const x = i * W / N;
+      const y = midY - r * (H / 2 - 24);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+
+    // Gradient stroke
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, '#00f5ff');
+    grad.addColorStop(0.5, '#4040ff');
+    grad.addColorStop(1, 'rgba(64,64,255,0.2)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // τ=0 marker
+    ctx.beginPath(); ctx.moveTo(0, 20); ctx.lineTo(0, H - 20);
+    ctx.strokeStyle = 'rgba(255,215,0,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,215,0,0.7)'; ctx.font = '9px Space Mono';
+    ctx.fillText('R(0)=σ²', 4, 30);
+  }
+};
+
+/* ════════════════════════════════
+   POISSON UNIVERSE
+════════════════════════════════ */
+const POISSON = {
+  canvas: null, ctx: null,
+  W: 0, H: 0,
+  rate: 4,
+  events: [],
+  elapsed: 0,
+  lastEvent: 0,
+  nextInterval: 0,
+
+  init() {
+    this.canvas = document.getElementById('poisson-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    this.reset();
+    this.loop();
+    window.addEventListener('resize', () => this.resize());
+  },
+
+  resize() {
+    this.canvas.width = this.canvas.offsetWidth * devicePixelRatio;
+    this.canvas.height = this.canvas.offsetHeight * devicePixelRatio;
+    this.ctx.scale(devicePixelRatio, devicePixelRatio);
+    this.W = this.canvas.offsetWidth;
+    this.H = this.canvas.offsetHeight;
+  },
+
+  sampleExponential() {
+    return -Math.log(Math.random()) / this.rate * 50;
+  },
+
+  reset() {
+    this.events = [];
+    this.elapsed = 0;
+    this.lastEvent = 0;
+    this.nextInterval = this.sampleExponential();
+    this.updateStats();
+  },
+
+  updateStats() {
+    const N = this.events.length;
+    const t = this.elapsed / 50;
+    const expected = (this.rate * t).toFixed(1);
+    document.getElementById('stat-events').textContent = N;
+    document.getElementById('stat-expected').textContent = expected;
+    document.getElementById('stat-var').textContent = expected;
+    document.getElementById('stat-ratio').textContent = N > 0 && parseFloat(expected) > 0
+      ? (N / parseFloat(expected)).toFixed(2) : '—';
+  },
+
+  step() {
+    this.elapsed += 1;
+    if (this.elapsed - this.lastEvent >= this.nextInterval) {
+      this.events.push(this.elapsed);
+      this.lastEvent = this.elapsed;
+      this.nextInterval = this.sampleExponential();
+      this.updateStats();
+    }
+    // Keep scrolling window
+    if (this.elapsed > this.W * 0.9) {
+      const shift = 2;
+      this.elapsed -= shift;
+      this.events = this.events.map(e => e - shift).filter(e => e >= 0);
+      this.lastEvent = Math.max(0, this.lastEvent - shift);
+      this.updateStats();
+    }
+  },
+
+  draw() {
+    const { ctx, W, H, events, elapsed } = this;
+    ctx.clearRect(0, 0, W, H);
+
+    // Background
+    ctx.fillStyle = 'rgba(7,7,26,0.4)';
+    ctx.fillRect(0, 0, W, H);
+
+    // Count staircase
+    const scaleX = W / Math.max(elapsed, 1);
+    const maxN = Math.max(events.length + 2, 5);
+    const scaleY = (H - 40) / maxN;
+
+    ctx.beginPath();
+    ctx.moveTo(0, H - 20);
+
+    let prevX = 0;
+    let count = 0;
+    events.forEach(e => {
+      const x = e * scaleX;
+      const y = H - 20 - count * scaleY;
+      ctx.lineTo(x, y);
+      count++;
+      ctx.lineTo(x, H - 20 - count * scaleY);
+    });
+    ctx.lineTo(elapsed * scaleX, H - 20 - count * scaleY);
+
+    ctx.strokeStyle = 'rgba(57,255,133,0.8)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Expected line
+    ctx.beginPath();
+    ctx.moveTo(0, H - 20);
+    ctx.lineTo(elapsed * scaleX, H - 20 - (this.rate * elapsed / 50) * scaleY);
+    ctx.strokeStyle = 'rgba(255,215,0,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Event markers
+    events.forEach(e => {
+      const x = e * scaleX;
+      ctx.beginPath(); ctx.arc(x, H - 20 - events.indexOf(e) * 0 - 5, 3, 0, Math.PI * 2);
+      // Find count at event
+    });
+
+    // Labels
+    ctx.font = '9px DM Mono';
+    ctx.fillStyle = 'rgba(57,255,133,0.6)';
+    ctx.fillText('N(t)', 6, 20);
+    ctx.fillStyle = 'rgba(255,215,0,0.6)';
+    ctx.fillText('λt', W - 24, 20);
+  },
+
+  loop() {
+    this.step();
+    this.draw();
+    requestAnimationFrame(() => this.loop());
+  }
+};
+
+/* ════════════════════════════════
+   CONTROLS
+════════════════════════════════ */
+function setMode(mode) {
+  SIM.mode = mode;
+  SIM.resetPaths();
+  document.querySelectorAll('.ctrl-btn:not(#btn-pause)').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + mode).classList.add('active');
+}
+
+function togglePause() {
+  SIM.paused = !SIM.paused;
+  const btn = document.getElementById('btn-pause');
+  btn.textContent = SIM.paused ? '▶' : '⏸';
+}
+
+function updateLambda(v) {
+  ACF.lambda = parseFloat(v);
+  document.getElementById('lambda-val').textContent = v;
+  ACF.draw();
+}
+
+function updateOmega(v) {
+  ACF.omega = parseFloat(v);
+  document.getElementById('omega-val').textContent = v;
+  ACF.draw();
+}
+
+function updatePoissonRate(v) {
+  POISSON.rate = parseFloat(v);
+  document.getElementById('poisson-rate-val').textContent = v;
+}
+
+function resetPoisson() {
+  POISSON.reset();
+}
+
+/* ════════════════════════════════
+   BOOT
+════════════════════════════════ */
+window.addEventListener('load', () => {
+  SIM.init();
+  ACF.init();
+  POISSON.init();
+
+  // Intersection observer for fade-in
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section, .phase-card, .level-item, .arch-card').forEach(el => {
+    el.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    observer.observe(el);
+  });
+});
+</script>
+</body>
+</html>
