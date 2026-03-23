@@ -1,0 +1,50 @@
+{
+  "name": "stochastic-command-centre",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "validate": "npm run lint && npm run typecheck && npm run test",
+    "prepare:githooks": "git config core.hooksPath .githooks"
+  },
+  "dependencies": {
+    "d3": "^7.9.0",
+    "framer-motion": "^11.11.17",
+    "katex": "^0.16.11",
+    "next": "^15.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-katex": "^3.0.1",
+    "three": "^0.170.0",
+    "zustand": "^5.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.23.0",
+    "@types/d3": "^7.4.3",
+    "@types/node": "^22.9.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitest/coverage-v8": "^3.0.9",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.23.0",
+    "eslint-config-next": "^15.0.3",
+    "eslint-config-prettier": "^10.1.1",
+    "globals": "^16.0.0",
+    "postcss": "^8.4.49",
+    "prettier": "^3.5.3",
+    "tailwindcss": "^3.4.15",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.28.0",
+    "vitest": "^3.0.9"
+  }
+}
