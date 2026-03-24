@@ -18,6 +18,14 @@ export function ProblemEngine({ problems }: { problems: Problem[] }) {
     }, {});
   }, [problems]);
 
+  if (problems.length === 0) {
+    return (
+      <div className="glass-panel rounded-[var(--radius-lg)] p-6 text-sm leading-7 text-textMuted">
+        No practice prompts are attached to this topic yet.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {Object.entries(grouped).map(([level, entries]) => (

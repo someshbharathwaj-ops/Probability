@@ -8,6 +8,14 @@ export function SimulationLab({
 }: {
   simulations: SimulationDefinition[];
 }) {
+  if (simulations.length === 0) {
+    return (
+      <div className="glass-panel rounded-[var(--radius-lg)] p-6 text-sm leading-7 text-textMuted">
+        No simulations are available for the current topic yet.
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       {simulations.map((simulation) => (
