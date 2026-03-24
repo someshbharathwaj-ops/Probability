@@ -1,8 +1,11 @@
 "use client";
 
+import { ActivityTimeline } from "@/features/learning/components/learning/activity-timeline";
 import { LearningModeSwitcher } from "@/features/learning/components/learning/learning-mode-switcher";
+import { MasterySpotlight } from "@/features/learning/components/learning/mastery-spotlight";
 import { ProblemEngine } from "@/features/learning/components/learning/problem-engine";
 import { ProgressOverview } from "@/features/learning/components/learning/progress-overview";
+import { TopicFilter } from "@/features/learning/components/learning/topic-filter";
 import { TopicPage } from "@/features/learning/components/learning/topic-page";
 import {
   ConceptGraphNode,
@@ -11,11 +14,17 @@ import {
   SimulationDefinition,
   Topic,
 } from "@/features/learning/domain/types";
+import {
+  buildHeroStats,
+  buildRecentActivity,
+  buildTopicSections,
+  buildTopicSpotlight,
+} from "@/features/learning/domain/selectors";
 import { recommendNextTopic } from "@/features/learning/domain/recommendation";
 import { useLearningStore } from "@/features/learning/store";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const ConceptGraph = dynamic(
   () =>
@@ -61,7 +70,9 @@ export function AppShell({
   graphNodes,
   simulations,
 }: AppShellProps) {
+  const [topicQuery, setTopicQuery] = useState("");
   const profile = useLearningStore((state) => state.profile);
+  const activityFeed = useLearningStore((state) => state.activityFeed);
   const activeTopicId = useLearningStore((state) => state.activeTopicId);
   const setActiveTopic = useLearningStore((state) => state.setActiveTopic);
   const mode = useLearningStore((state) => state.mode);
@@ -83,10 +94,26 @@ export function AppShell({
     () => recommendNextTopic(activeTopic.id, topics, profile.weakAreas),
     [activeTopic.id, profile.weakAreas, topics]
   );
+  const heroStats = useMemo(
+    () => buildHeroStats(profile, problems, simulations),
+    [profile, problems, simulations]
+  );
+  const topicSections = useMemo(
+    () => buildTopicSections(topics, topicQuery),
+    [topics, topicQuery]
+  );
+  const spotlight = useMemo(
+    () => buildTopicSpotlight(profile, topics),
+    [profile, topics]
+  );
+  const recentActivity = useMemo(
+    () => buildRecentActivity(activityFeed),
+    [activityFeed]
+  );
 
   return (
     <div className="relative min-h-screen">
-      <div className="mx-auto grid min-h-screen max-w-[1680px] grid-cols-1 xl:grid-cols-[300px_minmax(0,1fr)]">
+      <div className="mx-auto grid min-h-screen max-w-[1680px] grid-cols-1 xl:grid-cols-[320px_minmax(0,1fr)]">
         <aside className="border-b border-border/70 bg-black/10 px-5 py-6 xl:sticky xl:top-0 xl:h-screen xl:border-b-0 xl:border-r xl:px-6 xl:py-8">
           <div className="glass-panel rounded-[var(--radius-lg)] p-5">
             <div className="eyebrow">SP//OS</div>
@@ -94,32 +121,46 @@ export function AppShell({
               Stochastic Processes Operating System
             </h1>
             <p className="mt-4 text-sm leading-7 text-textMuted">
-              Re-engineered from the static command centre into a product-grade
-              learning platform with modular lessons, analytics, and simulation
-              surfaces.
+              A cleaner command center for theory, formula recall, guided
+              problem solving, and simulation-backed intuition.
             </p>
           </div>
-          <nav className="mt-6 space-y-2">
-            {topics.map((topic) => {
-              const active = topic.id === activeTopic.id;
-              return (
-                <button
-                  key={topic.id}
-                  onClick={() => setActiveTopic(topic.id)}
-                  className={`glass-panel flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition ${active ? "border-accent bg-accentSoft" : ""}`}
-                >
-                  <div>
-                    <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-textMuted">
-                      {topic.section}
-                    </div>
-                    <div className="mt-1 text-sm text-text">
-                      {topic.shortTitle}
-                    </div>
-                  </div>
-                  <span className="pill">{topic.order}</span>
-                </button>
-              );
-            })}
+
+          <TopicFilter value={topicQuery} onChange={setTopicQuery} />
+
+          <nav className="mt-6 space-y-5">
+            {Object.entries(topicSections).map(([section, sectionTopics]) => (
+              <div key={section} className="space-y-2">
+                <div className="font-mono text-[11px] uppercase tracking-[0.28em] text-textMuted">
+                  {section}
+                </div>
+                {sectionTopics.map((topic) => {
+                  const active = topic.id === activeTopic.id;
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => setActiveTopic(topic.id)}
+                      className={`glass-panel flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left transition ${active ? "border-accent bg-accentSoft" : ""}`}
+                    >
+                      <div>
+                        <div className="text-sm text-text">
+                          {topic.shortTitle}
+                        </div>
+                        <div className="mt-1 text-xs leading-5 text-textMuted">
+                          {topic.description}
+                        </div>
+                      </div>
+                      <span className="pill">{topic.order}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+            {Object.keys(topicSections).length === 0 ? (
+              <div className="glass-panel rounded-2xl p-4 text-sm leading-7 text-textMuted">
+                No topics matched the current search.
+              </div>
+            ) : null}
           </nav>
         </aside>
 
@@ -134,53 +175,45 @@ export function AppShell({
                   Engineer stochastic intuition like a product system.
                 </h2>
                 <p className="mt-5 max-w-3xl text-base leading-8 text-textMuted">
-                  The platform now separates theory, formula memory, problem
-                  solving, concept dependencies, and simulation surfaces into
-                  composable modules. Learning mode controls the UI, analytics
-                  track mastery, and the backend surface is ready for
-                  persistence, AI tutoring, and collaboration.
+                  The workspace now prioritizes live mastery signals, recent
+                  study activity, focused topic navigation, and recommendation
+                  flows that help you move faster through difficult material.
                 </p>
                 <div className="mt-6 flex flex-wrap gap-3">
-                  <span className="pill">Next.js App Router</span>
-                  <span className="pill">Node API routes</span>
-                  <span className="pill">Zustand state</span>
-                  <span className="pill">D3 concept graph</span>
-                  <span className="pill">Framer Motion</span>
+                  <span className="pill">Feature-first architecture</span>
+                  <span className="pill">Live progress model</span>
+                  <span className="pill">Searchable syllabus</span>
+                  <span className="pill">Problem telemetry</span>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                {["Modes", "Analytics", "Problems", "Simulations"].map(
-                  (label, index) => (
-                    <motion.div
-                      key={label}
-                      whileHover={{ y: -4 }}
-                      className="rounded-[var(--radius-md)] border border-border bg-white/5 p-5"
-                    >
-                      <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-textMuted">
-                        {label}
-                      </div>
-                      <div className="mt-3 font-display text-4xl text-accent">
-                        0{index + 1}
-                      </div>
-                      <p className="mt-3 text-sm leading-6 text-textMuted">
-                        {
-                          [
-                            "Mode-aware pedagogical rendering.",
-                            "Weak-area detection and recall signals.",
-                            "Hints, steps, and difficulty routing.",
-                            "Structured labs ready for D3 and Three.js.",
-                          ][index]
-                        }
-                      </p>
-                    </motion.div>
-                  )
-                )}
+                {heroStats.map((card) => (
+                  <motion.div
+                    key={card.label}
+                    whileHover={{ y: -4 }}
+                    className="rounded-[var(--radius-md)] border border-border bg-white/5 p-5"
+                  >
+                    <div className="font-mono text-[11px] uppercase tracking-[0.3em] text-textMuted">
+                      {card.label}
+                    </div>
+                    <div className="mt-3 font-display text-4xl text-accent">
+                      {card.value}
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-textMuted">
+                      {card.detail}
+                    </p>
+                  </motion.div>
+                ))}
               </div>
             </div>
           </section>
 
           <LearningModeSwitcher />
           <ProgressOverview profile={profile} />
+          <MasterySpotlight
+            strongest={spotlight.strongest}
+            weakest={spotlight.weakest}
+          />
 
           <section className="glass-panel rounded-[var(--radius-lg)] p-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -188,7 +221,15 @@ export function AppShell({
                 <div className="eyebrow">Active Topic</div>
                 <h2 className="section-heading mt-3">{activeTopic.title}</h2>
               </div>
-              <div className="pill">Mode: {mode}</div>
+              <div className="flex flex-wrap gap-3">
+                <div className="pill">Mode: {mode}</div>
+                <button
+                  className="pill text-text"
+                  onClick={() => setActiveTopic(recommendation.id)}
+                >
+                  Jump to recommended topic
+                </button>
+              </div>
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-textMuted">
               Recommended next topic:{" "}
@@ -200,15 +241,18 @@ export function AppShell({
 
           <TopicPage topic={activeTopic} formulas={topicFormulas} />
 
-          <section className="space-y-5">
-            <div>
-              <div className="eyebrow">Dependency Graph</div>
-              <h2 className="section-heading mt-3">
-                Interactive concept map from RVs to Poisson processes
-              </h2>
-            </div>
-            <ConceptGraph nodes={graphNodes} />
-          </section>
+          <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <section className="space-y-5">
+              <div>
+                <div className="eyebrow">Dependency Graph</div>
+                <h2 className="section-heading mt-3">
+                  Interactive concept map from RVs to Poisson processes
+                </h2>
+              </div>
+              <ConceptGraph nodes={graphNodes} />
+            </section>
+            <ActivityTimeline activityFeed={recentActivity} />
+          </div>
 
           <section className="space-y-5">
             <div>
@@ -230,26 +274,6 @@ export function AppShell({
               </h2>
             </div>
             <SimulationLab simulations={simulations} />
-          </section>
-
-          <section className="glass-panel rounded-[var(--radius-lg)] p-6">
-            <div className="eyebrow">Future-ready platform surfaces</div>
-            <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-              {[
-                "Authentication and cloud sync",
-                "AI tutor orchestration layer",
-                "Real-time collaborative solving",
-                "Offline PWA packaging",
-                "Mobile app conversion via shared modules",
-              ].map((item) => (
-                <div
-                  key={item}
-                  className="rounded-2xl border border-border bg-white/5 p-4 text-sm leading-6 text-textMuted"
-                >
-                  {item}
-                </div>
-              ))}
-            </div>
           </section>
         </main>
       </div>
