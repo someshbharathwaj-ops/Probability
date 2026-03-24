@@ -98,6 +98,15 @@ export interface LearnerProfile {
   weakAreas: TopicId[];
 }
 
+export interface LearningActivity {
+  id: string;
+  kind: "topic_view" | "mode_change" | "formula_review" | "problem_result";
+  topicId: TopicId;
+  label: string;
+  detail: string;
+  timestamp: string;
+}
+
 export interface AnalyticsEvent {
   id: string;
   type: "topic_view" | "formula_flip" | "problem_attempt" | "mode_change";
