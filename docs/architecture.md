@@ -26,6 +26,8 @@ The repository uses a feature-first structure for product logic and a shared lay
 3. Zustand persists learner interactions locally.
 4. Progress domain functions update the learner profile so the overview and recommendations remain live.
 
-## Legacy Content
+## Cleanup Direction
 
-Historic HTML prototypes live in `docs/legacy` and are intentionally separated from the runtime app.
+The repository no longer carries the old standalone HTML prototypes. The runtime
+surface, architecture docs, and contributor guidance now describe the Next.js
+application as the single maintained product entrypoint.

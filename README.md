@@ -89,10 +89,6 @@ For a fuller breakdown, see [`docs/architecture.md`](./docs/architecture.md) and
 - CI on push and pull request
 - Lint, typecheck, test, and production build validation
 
-## Legacy Assets
-
-The original HTML prototypes are preserved in [`docs/legacy`](./docs/legacy) for reference and design provenance. They are intentionally excluded from linting and production runtime paths.
-
 ## Roadmap
 
 - Replace the in-memory repository with persistent storage

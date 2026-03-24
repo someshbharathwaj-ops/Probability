@@ -20,5 +20,5 @@
 - Move app code under `src`
 - Organize domain logic around `src/features/learning`
 - Introduce shared config, observability, and error layers
-- Preserve the prototype HTML as documentation assets
+- Remove stale prototype artifacts once the new app becomes the maintained path
 - Add quality gates and onboarding documentation
