@@ -26,6 +26,14 @@ function parseBoolean(value: unknown, field: string) {
   return value;
 }
 
+function parseRequiredTopicId(value: unknown, field: string): TopicId {
+  if (typeof value !== "string") {
+    throw new AppError(400, "INVALID_REQUEST", `${field} must be provided.`);
+  }
+
+  return parseTopicId(value) as TopicId;
+}
+
 export function parseTopicId(
   value: string | null | undefined
 ): TopicId | undefined {
@@ -52,20 +60,14 @@ export function parseProgressMutation(input: unknown): ProgressMutation {
   if (input.type === "topic_view") {
     return {
       type: "topic_view",
-      topicId:
-        parseTopicId(
-          typeof input.topicId === "string" ? input.topicId : null
-        ) ?? TOPIC_IDS[0],
+      topicId: parseRequiredTopicId(input.topicId, "topicId"),
     };
   }
 
   if (input.type === "formula_recall") {
     return {
       type: "formula_recall",
-      topicId:
-        parseTopicId(
-          typeof input.topicId === "string" ? input.topicId : null
-        ) ?? TOPIC_IDS[0],
+      topicId: parseRequiredTopicId(input.topicId, "topicId"),
       correct: parseBoolean(input.correct, "correct"),
     };
   }
