@@ -39,6 +39,9 @@ export function ProgressOverview({ profile }: { profile: LearnerProfile }) {
           <div className={`mt-4 font-display text-3xl ${card.tone}`}>
             {card.value}
           </div>
+          <p className="mt-3 text-xs uppercase tracking-[0.24em] text-textMuted">
+            Last active topic: {profile.activeTopicId}
+          </p>
         </article>
       ))}
     </div>
