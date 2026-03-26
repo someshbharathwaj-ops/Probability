@@ -9,6 +9,7 @@ interface StudyPlannerProps {
   todayMinutes: number;
   currentStreak: number;
   longestStreak: number;
+  sessionsToWeeklyTarget: number;
   onSetDailyGoal: (minutes: number) => void;
   onOpenTopic: (topicId: Topic["id"]) => void;
 }
@@ -20,6 +21,7 @@ export function StudyPlanner({
   todayMinutes,
   currentStreak,
   longestStreak,
+  sessionsToWeeklyTarget,
   onSetDailyGoal,
   onOpenTopic,
 }: StudyPlannerProps) {
@@ -103,6 +105,9 @@ export function StudyPlanner({
               <div className="text-xs uppercase tracking-[0.22em] text-textMuted">Best streak</div>
             </div>
           </div>
+          <p className="mt-4 text-sm leading-7 text-textMuted">
+            Weekly target gap: {sessionsToWeeklyTarget} more focused study sessions.
+          </p>
           <div className="mt-4 flex flex-wrap gap-3">
             {bookmarkedTopics.length > 0 ? (
               bookmarkedTopics.map((topic) => (
