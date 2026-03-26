@@ -23,8 +23,9 @@ The repository uses a feature-first structure for product logic and a shared lay
 
 1. `src/app/page.tsx` renders the learning dashboard.
 2. The dashboard composes the feature app shell and content catalog.
-3. Zustand persists learner interactions locally.
-4. Progress domain functions update the learner profile so the overview and recommendations remain live.
+3. Zustand persists learner interactions, bookmarks, goals, and practice outcomes locally.
+4. Progress domain functions update the learner profile, streaks, review queue, and completion signals.
+5. Selector helpers derive spotlight cards, planner queues, and topic groupings for the UI.
 
 ## Cleanup Direction
 
