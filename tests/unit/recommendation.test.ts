@@ -20,6 +20,14 @@ describe("recommendation engine", () => {
     expect(recommendation.id).toBe("cdf");
   });
 
+  it("skips completed weak areas when choosing the next topic", () => {
+    const recommendation = recommendNextTopic("joint", topics, ["poisson"], [
+      "poisson",
+    ]);
+
+    expect(recommendation.id).toBe("process");
+  });
+
   it("groups problems by difficulty", () => {
     const grouped = groupProblemsByDifficulty(problems);
 
