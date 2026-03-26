@@ -21,6 +21,7 @@ import {
   buildHeroStats,
   buildRecentActivity,
   buildReviewTopics,
+  buildSimulationStatusCounts,
   buildTopicSections,
   buildTopicSpotlight,
 } from "@/features/learning/domain/selectors";
@@ -139,6 +140,10 @@ export function AppShell({
   );
   const goalSummary = useMemo(() => buildGoalSummary(profile), [profile]);
   const studyQueue = useMemo(() => buildStudyQueue(profile, topics), [profile, topics]);
+  const simulationCounts = useMemo(
+    () => buildSimulationStatusCounts(simulations),
+    [simulations]
+  );
 
   return (
     <div className="relative min-h-screen">
@@ -246,6 +251,7 @@ export function AppShell({
             todayMinutes={profile.todayMinutes}
             currentStreak={profile.currentStreak}
             longestStreak={profile.longestStreak}
+            sessionsToWeeklyTarget={goalSummary.sessionsToWeeklyTarget}
             onSetDailyGoal={setDailyGoalMinutes}
             onOpenTopic={setActiveTopic}
           />
@@ -325,6 +331,10 @@ export function AppShell({
               <h2 className="section-heading mt-3">
                 Visualization modules filtered by the active topic
               </h2>
+              <p className="mt-3 text-sm leading-7 text-textMuted">
+                Ready: {simulationCounts.ready} / Scaffolded: {simulationCounts.scaffolded} /
+                Planned: {simulationCounts.planned}
+              </p>
             </div>
             <SimulationLab simulations={simulations} activeTopicId={activeTopic.id} />
           </section>
