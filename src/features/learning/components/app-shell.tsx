@@ -5,6 +5,7 @@ import { LearningModeSwitcher } from "@/features/learning/components/learning/le
 import { MasterySpotlight } from "@/features/learning/components/learning/mastery-spotlight";
 import { ProblemEngine } from "@/features/learning/components/learning/problem-engine";
 import { ProgressOverview } from "@/features/learning/components/learning/progress-overview";
+import { StudyPlanner } from "@/features/learning/components/learning/study-planner";
 import { TopicFilter } from "@/features/learning/components/learning/topic-filter";
 import { TopicPage } from "@/features/learning/components/learning/topic-page";
 import {
@@ -15,12 +16,18 @@ import {
   Topic,
 } from "@/features/learning/domain/types";
 import {
+  buildBookmarkedTopics,
+  buildGoalSummary,
   buildHeroStats,
   buildRecentActivity,
+  buildReviewTopics,
   buildTopicSections,
   buildTopicSpotlight,
 } from "@/features/learning/domain/selectors";
-import { recommendNextTopic } from "@/features/learning/domain/recommendation";
+import {
+  buildStudyQueue,
+  recommendNextTopic,
+} from "@/features/learning/domain/recommendation";
 import { useLearningStore } from "@/features/learning/store";
 import { motion } from "framer-motion";
 import dynamic from "next/dynamic";
@@ -75,6 +82,12 @@ export function AppShell({
   const activityFeed = useLearningStore((state) => state.activityFeed);
   const activeTopicId = useLearningStore((state) => state.activeTopicId);
   const setActiveTopic = useLearningStore((state) => state.setActiveTopic);
+  const toggleTopicBookmark = useLearningStore(
+    (state) => state.toggleTopicBookmark
+  );
+  const setDailyGoalMinutes = useLearningStore(
+    (state) => state.setDailyGoalMinutes
+  );
   const mode = useLearningStore((state) => state.mode);
 
   const activeTopic = useMemo(
@@ -91,8 +104,14 @@ export function AppShell({
     [activeTopic.id, problems]
   );
   const recommendation = useMemo(
-    () => recommendNextTopic(activeTopic.id, topics, profile.weakAreas),
-    [activeTopic.id, profile.weakAreas, topics]
+    () =>
+      recommendNextTopic(
+        activeTopic.id,
+        topics,
+        profile.weakAreas,
+        profile.completedTopics
+      ),
+    [activeTopic.id, profile.completedTopics, profile.weakAreas, topics]
   );
   const heroStats = useMemo(
     () => buildHeroStats(profile, problems, simulations),
@@ -110,6 +129,16 @@ export function AppShell({
     () => buildRecentActivity(activityFeed),
     [activityFeed]
   );
+  const bookmarkedTopics = useMemo(
+    () => buildBookmarkedTopics(profile, topics),
+    [profile, topics]
+  );
+  const reviewTopics = useMemo(
+    () => buildReviewTopics(profile, topics),
+    [profile, topics]
+  );
+  const goalSummary = useMemo(() => buildGoalSummary(profile), [profile]);
+  const studyQueue = useMemo(() => buildStudyQueue(profile, topics), [profile, topics]);
 
   return (
     <div className="relative min-h-screen">
@@ -183,7 +212,7 @@ export function AppShell({
                   <span className="pill">Feature-first architecture</span>
                   <span className="pill">Live progress model</span>
                   <span className="pill">Searchable syllabus</span>
-                  <span className="pill">Problem telemetry</span>
+                  <span className="pill">Study planner lane</span>
                 </div>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
@@ -210,6 +239,16 @@ export function AppShell({
 
           <LearningModeSwitcher />
           <ProgressOverview profile={profile} />
+          <StudyPlanner
+            bookmarkedTopics={bookmarkedTopics}
+            reviewTopics={reviewTopics}
+            dailyGoalMinutes={profile.dailyGoalMinutes}
+            todayMinutes={profile.todayMinutes}
+            currentStreak={profile.currentStreak}
+            longestStreak={profile.longestStreak}
+            onSetDailyGoal={setDailyGoalMinutes}
+            onOpenTopic={setActiveTopic}
+          />
           <MasterySpotlight
             strongest={spotlight.strongest}
             weakest={spotlight.weakest}
@@ -237,9 +276,23 @@ export function AppShell({
               recommendation is driven by weak-area prioritisation and
               prerequisite-aware progression.
             </p>
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-textMuted">
+              You have {goalSummary.remainingMinutes} minutes remaining on the
+              current daily target. Queue now:{" "}
+              <span className="text-text">
+                {studyQueue.map((topic) => topic.shortTitle).join(" / ") || "warming up"}
+              </span>
+              .
+            </p>
           </section>
 
-          <TopicPage topic={activeTopic} formulas={topicFormulas} />
+          <TopicPage
+            topic={activeTopic}
+            formulas={topicFormulas}
+            isBookmarked={profile.bookmarkedTopics.includes(activeTopic.id)}
+            isCompleted={profile.completedTopics.includes(activeTopic.id)}
+            onToggleBookmark={toggleTopicBookmark}
+          />
 
           <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
             <section className="space-y-5">
@@ -270,10 +323,10 @@ export function AppShell({
             <div>
               <div className="eyebrow">Simulation Framework</div>
               <h2 className="section-heading mt-3">
-                Visualization modules prepared for D3 and Three.js expansion
+                Visualization modules filtered by the active topic
               </h2>
             </div>
-            <SimulationLab simulations={simulations} />
+            <SimulationLab simulations={simulations} activeTopicId={activeTopic.id} />
           </section>
         </main>
       </div>
