@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0] - 2026-03-26
+
+### Added
+
+- Study planner with daily goals, bookmark shortcuts, and review queue surfacing
+- Session streak tracking, completion signals, and outcome-based problem filters
+- Topic-aware simulation filters plus richer recommendation coverage in unit tests
+
+### Changed
+
+- Reworked dashboard hero stats to reflect daily practice goals and current streaks
+- Expanded learner profile persistence to carry planner, bookmark, and review metadata
+
 ## [0.2.0] - 2026-03-25
 
 ### Added
