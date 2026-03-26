@@ -6,8 +6,10 @@ import {
 } from "@/features/learning/content/catalog";
 import { createInitialProfile } from "@/features/learning/domain/progress";
 import {
+  buildGoalSummary,
   buildHeroStats,
   buildRecentActivity,
+  buildSimulationStatusCounts,
   buildTopicSections,
   buildTopicSpotlight,
 } from "@/features/learning/domain/selectors";
@@ -53,5 +55,25 @@ describe("learning selectors", () => {
 
     expect(recent).toHaveLength(6);
     expect(recent[0]?.label).toBe("Item 7");
+  });
+
+  it("summarizes the learner goal progress", () => {
+    const profile = {
+      ...createInitialProfile(topics),
+      todayMinutes: 25,
+      dailyGoalMinutes: 40,
+    };
+    const summary = buildGoalSummary(profile);
+
+    expect(summary.progress).toBe(0.625);
+    expect(summary.remainingMinutes).toBe(15);
+  });
+
+  it("counts simulation statuses for dashboard copy", () => {
+    const counts = buildSimulationStatusCounts(simulations);
+
+    expect(counts.ready).toBe(2);
+    expect(counts.scaffolded).toBe(2);
+    expect(counts.planned).toBe(0);
   });
 });
