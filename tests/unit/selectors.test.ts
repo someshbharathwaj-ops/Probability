@@ -18,7 +18,10 @@ describe("learning selectors", () => {
     const stats = buildHeroStats(profile, problems, simulations);
 
     expect(stats).toHaveLength(4);
-    expect(stats[2]?.value).toBe(String(problems.length));
+    expect(stats[2]?.value).toBe("0/40m");
+    expect(stats[3]?.value).toBe(
+      String(simulations.filter((simulation) => simulation.status === "ready").length)
+    );
   });
 
   it("groups filtered topics by section", () => {
