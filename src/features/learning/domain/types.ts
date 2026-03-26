@@ -1,4 +1,5 @@
 export type LearningMode = "flashcards" | "deep" | "problem" | "revision";
+export type SimulationStatus = "ready" | "scaffolded" | "planned";
 
 export const TOPIC_IDS = [
   "rv",
@@ -77,7 +78,7 @@ export interface SimulationDefinition {
   id: string;
   title: string;
   summary: string;
-  status: "ready" | "scaffolded" | "planned";
+  status: SimulationStatus;
   metrics: string[];
   topicIds: TopicId[];
 }
@@ -88,6 +89,7 @@ export interface TopicMastery {
   formulaRecall: number;
   problemAccuracy: number;
   lastVisitedAt: string;
+  completedCycles: number;
 }
 
 export interface LearnerProfile {
@@ -96,11 +98,27 @@ export interface LearnerProfile {
   activeTopicId: TopicId;
   topicMastery: TopicMastery[];
   weakAreas: TopicId[];
+  reviewQueue: TopicId[];
+  bookmarkedTopics: TopicId[];
+  completedTopics: TopicId[];
+  dailyGoalMinutes: number;
+  weeklyGoalSessions: number;
+  todayMinutes: number;
+  totalSessions: number;
+  currentStreak: number;
+  longestStreak: number;
+  lastSessionOn: string | null;
 }
 
 export interface LearningActivity {
   id: string;
-  kind: "topic_view" | "mode_change" | "formula_review" | "problem_result";
+  kind:
+    | "topic_view"
+    | "mode_change"
+    | "formula_review"
+    | "problem_result"
+    | "bookmark"
+    | "goal_update";
   topicId: TopicId;
   label: string;
   detail: string;
