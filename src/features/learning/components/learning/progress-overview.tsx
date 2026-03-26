@@ -20,8 +20,8 @@ export function ProgressOverview({ profile }: { profile: LearnerProfile }) {
       tone: "text-mint",
     },
     {
-      label: "Weak Areas",
-      value: profile.weakAreas.join(" / "),
+      label: "Study Streak",
+      value: `${profile.currentStreak} days`,
       tone: "text-rose",
     },
   ];
@@ -40,7 +40,9 @@ export function ProgressOverview({ profile }: { profile: LearnerProfile }) {
             {card.value}
           </div>
           <p className="mt-3 text-xs uppercase tracking-[0.24em] text-textMuted">
-            Last active topic: {profile.activeTopicId}
+            {card.label === "Study Streak"
+              ? `Weak areas: ${profile.weakAreas.join(" / ")}`
+              : `Last active topic: ${profile.activeTopicId}`}
           </p>
         </article>
       ))}
