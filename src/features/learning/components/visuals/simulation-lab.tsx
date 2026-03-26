@@ -1,13 +1,32 @@
 "use client";
 
-import { SimulationDefinition } from "@/features/learning/domain/types";
+import { SimulationDefinition, TopicId } from "@/features/learning/domain/types";
 import { motion } from "framer-motion";
+import { useMemo, useState } from "react";
 
 export function SimulationLab({
   simulations,
+  activeTopicId,
 }: {
   simulations: SimulationDefinition[];
+  activeTopicId: TopicId;
 }) {
+  const [statusFilter, setStatusFilter] = useState<"all" | "ready" | "scaffolded">(
+    "all"
+  );
+
+  const filteredSimulations = useMemo(
+    () =>
+      simulations.filter((simulation) => {
+        const matchesStatus =
+          statusFilter === "all" ? true : simulation.status === statusFilter;
+        const matchesTopic = simulation.topicIds.includes(activeTopicId);
+
+        return matchesStatus && matchesTopic;
+      }),
+    [activeTopicId, simulations, statusFilter]
+  );
+
   if (simulations.length === 0) {
     return (
       <div className="glass-panel rounded-[var(--radius-lg)] p-6 text-sm leading-7 text-textMuted">
@@ -17,8 +36,20 @@ export function SimulationLab({
   }
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
-      {simulations.map((simulation) => (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-3">
+        {(["all", "ready", "scaffolded"] as const).map((filter) => (
+          <button
+            key={filter}
+            className={`pill ${statusFilter === filter ? "text-text" : ""}`}
+            onClick={() => setStatusFilter(filter)}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
+      <div className="grid gap-4 xl:grid-cols-2">
+        {filteredSimulations.map((simulation) => (
         <motion.article
           key={simulation.id}
           whileHover={{ y: -4 }}
@@ -60,7 +91,13 @@ export function SimulationLab({
             ))}
           </div>
         </motion.article>
-      ))}
+        ))}
+      </div>
+      {filteredSimulations.length === 0 ? (
+        <div className="glass-panel rounded-[var(--radius-lg)] p-6 text-sm leading-7 text-textMuted">
+          No simulations match this topic and status filter yet.
+        </div>
+      ) : null}
     </div>
   );
 }
