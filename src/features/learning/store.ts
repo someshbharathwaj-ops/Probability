@@ -2,7 +2,11 @@
 
 import { problems, topics } from "@/features/learning/content/catalog";
 import {
+  buildReviewQueue,
   createInitialProfile,
+  detectCompletedTopics,
+  toggleBookmarkedTopic,
+  updateDailyGoal,
   updateFormulaRecall,
   updateProblemOutcome,
   updateTopicView,
@@ -26,6 +30,8 @@ interface LearningState {
   formulaConfidence: Record<string, boolean>;
   setMode: (mode: LearningMode) => void;
   setActiveTopic: (topicId: TopicId) => void;
+  toggleTopicBookmark: (topicId: TopicId) => void;
+  setDailyGoalMinutes: (minutes: number) => void;
   revealHint: (problemId: string) => void;
   markProblemSolved: (problemId: string, solved: boolean) => void;
   markFormulaRecall: (
@@ -78,6 +84,7 @@ export const useLearningStore = create<LearningState>()(
           profile: {
             ...state.profile,
             currentMode: mode,
+            reviewQueue: buildReviewQueue(state.profile.topicMastery),
           },
         })),
       setActiveTopic: (activeTopicId) =>
@@ -94,6 +101,39 @@ export const useLearningStore = create<LearningState>()(
           ].slice(0, 25),
           profile: updateTopicView(state.profile, activeTopicId),
         })),
+      toggleTopicBookmark: (topicId) =>
+        set((state) => {
+          const nextProfile = toggleBookmarkedTopic(state.profile, topicId);
+          const bookmarked = nextProfile.bookmarkedTopics.includes(topicId);
+
+          return {
+            profile: nextProfile,
+            activityFeed: [
+              createActivity(
+                "bookmark",
+                topicId,
+                bookmarked ? "Topic bookmarked" : "Bookmark removed",
+                bookmarked
+                  ? `Saved ${topicId} for quick review.`
+                  : `Removed ${topicId} from the bookmark shelf.`
+              ),
+              ...state.activityFeed,
+            ].slice(0, 25),
+          };
+        }),
+      setDailyGoalMinutes: (minutes) =>
+        set((state) => ({
+          profile: updateDailyGoal(state.profile, minutes),
+          activityFeed: [
+            createActivity(
+              "goal_update",
+              state.activeTopicId,
+              "Daily goal updated",
+              `Adjusted the daily study target to ${minutes} minutes.`
+            ),
+            ...state.activityFeed,
+          ].slice(0, 25),
+        })),
       revealHint: (problemId) =>
         set((state) => ({
           revealedHints: {
@@ -108,40 +148,55 @@ export const useLearningStore = create<LearningState>()(
           return;
         }
 
-        set((state) => ({
-          solvedProblems: {
-            ...state.solvedProblems,
-            [problemId]: solved,
-          },
-          activityFeed: [
-            createActivity(
-              "problem_result",
-              problem.topicId,
-              solved ? "Problem solved" : "Problem struggled",
-              `${problem.title} was marked as ${solved ? "solved" : "needs reinforcement"}.`
-            ),
-            ...state.activityFeed,
-          ].slice(0, 25),
-          profile: updateProblemOutcome(state.profile, problem, solved),
-        }));
+        set((state) => {
+          const nextProfile = updateProblemOutcome(state.profile, problem, solved);
+
+          return {
+            solvedProblems: {
+              ...state.solvedProblems,
+              [problemId]: solved,
+            },
+            activityFeed: [
+              createActivity(
+                "problem_result",
+                problem.topicId,
+                solved ? "Problem solved" : "Problem struggled",
+                `${problem.title} was marked as ${solved ? "solved" : "needs reinforcement"}.`
+              ),
+              ...state.activityFeed,
+            ].slice(0, 25),
+            profile: {
+              ...nextProfile,
+              completedTopics: detectCompletedTopics(nextProfile.topicMastery),
+            },
+          };
+        });
       },
       markFormulaRecall: (formulaId, topicId, correct) =>
-        set((state) => ({
-          formulaConfidence: {
-            ...state.formulaConfidence,
-            [formulaId]: correct,
-          },
-          activityFeed: [
-            createActivity(
-              "formula_review",
-              topicId,
-              correct ? "Formula recalled" : "Formula flagged",
-              `${formulaId} was marked as ${correct ? "recalled" : "needs review"}.`
-            ),
-            ...state.activityFeed,
-          ].slice(0, 25),
-          profile: updateFormulaRecall(state.profile, topicId, correct),
-        })),
+        set((state) => {
+          const nextProfile = updateFormulaRecall(
+            state.profile,
+            topicId,
+            correct
+          );
+
+          return {
+            formulaConfidence: {
+              ...state.formulaConfidence,
+              [formulaId]: correct,
+            },
+            activityFeed: [
+              createActivity(
+                "formula_review",
+                topicId,
+                correct ? "Formula recalled" : "Formula flagged",
+                `${formulaId} was marked as ${correct ? "recalled" : "needs review"}.`
+              ),
+              ...state.activityFeed,
+            ].slice(0, 25),
+            profile: nextProfile,
+          };
+        }),
     }),
     {
       name: "stochastic-command-centre",
