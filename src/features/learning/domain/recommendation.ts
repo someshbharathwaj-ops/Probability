@@ -1,16 +1,30 @@
-import { Problem, Topic, TopicId } from "@/features/learning/domain/types";
+import {
+  LearnerProfile,
+  Problem,
+  Topic,
+  TopicId,
+} from "@/features/learning/domain/types";
 
 export function recommendNextTopic(
   activeTopicId: TopicId,
   topics: Topic[],
-  weakAreas: TopicId[]
+  weakAreas: TopicId[],
+  completedTopics: TopicId[] = []
 ) {
-  if (weakAreas.length > 0 && weakAreas[0] !== activeTopicId) {
-    return topics.find((topic) => topic.id === weakAreas[0]) ?? topics[0];
+  const eligibleWeakArea = weakAreas.find(
+    (topicId) => topicId !== activeTopicId && !completedTopics.includes(topicId)
+  );
+
+  if (eligibleWeakArea) {
+    return topics.find((topic) => topic.id === eligibleWeakArea) ?? topics[0];
   }
 
   const currentIndex = topics.findIndex((topic) => topic.id === activeTopicId);
-  return topics[currentIndex + 1] ?? topics[currentIndex] ?? topics[0];
+  const nextLinearTopic = topics
+    .slice(currentIndex + 1)
+    .find((topic) => !completedTopics.includes(topic.id));
+
+  return nextLinearTopic ?? topics[currentIndex] ?? topics[0];
 }
 
 export function groupProblemsByDifficulty(problemBank: Problem[]) {
@@ -20,4 +34,24 @@ export function groupProblemsByDifficulty(problemBank: Problem[]) {
     hard: problemBank.filter((problem) => problem.level === "hard"),
     monster: problemBank.filter((problem) => problem.level === "monster"),
   };
+}
+
+export function buildStudyQueue(profile: LearnerProfile, topics: Topic[]) {
+  const queueIds = [
+    ...profile.reviewQueue,
+    ...profile.bookmarkedTopics,
+    ...topics
+      .filter(
+        (topic) =>
+          topic.prerequisites.every((prereq) =>
+            profile.completedTopics.includes(prereq)
+          ) && !profile.completedTopics.includes(topic.id)
+      )
+      .map((topic) => topic.id),
+  ].filter((topicId, index, items) => items.indexOf(topicId) === index);
+
+  return queueIds
+    .map((topicId) => topics.find((topic) => topic.id === topicId))
+    .filter((topic): topic is Topic => Boolean(topic))
+    .slice(0, 5);
 }
