@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { problems, topics } from "@/features/learning/content/catalog";
 import {
+  buildReviewQueue,
   createInitialProfile,
   detectWeakAreas,
+  toggleBookmarkedTopic,
+  updateDailyGoal,
   updateFormulaRecall,
   updateProblemOutcome,
   updateTopicView,
@@ -46,5 +49,28 @@ describe("progress engine", () => {
 
     expect(updated.weakAreas).toHaveLength(3);
     expect(detectWeakAreas(updated.topicMastery)).toEqual(updated.weakAreas);
+  });
+
+  it("toggles bookmarks for quick review", () => {
+    const profile = createInitialProfile(topics);
+    const withBookmark = toggleBookmarkedTopic(profile, "poisson");
+    const withoutBookmark = toggleBookmarkedTopic(withBookmark, "poisson");
+
+    expect(withBookmark.bookmarkedTopics).toContain("poisson");
+    expect(withoutBookmark.bookmarkedTopics).not.toContain("poisson");
+  });
+
+  it("updates the learner daily goal", () => {
+    const profile = createInitialProfile(topics);
+    const updated = updateDailyGoal(profile, 60);
+
+    expect(updated.dailyGoalMinutes).toBe(60);
+  });
+
+  it("builds a four-topic review queue", () => {
+    const profile = createInitialProfile(topics);
+    const queue = buildReviewQueue(profile.topicMastery);
+
+    expect(queue).toHaveLength(4);
   });
 });
