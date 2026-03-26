@@ -22,3 +22,11 @@
 - Introduce shared config, observability, and error layers
 - Remove stale prototype artifacts once the new app becomes the maintained path
 - Add quality gates and onboarding documentation
+
+## Current Enhancement Direction
+
+- Deepen the learner workflow instead of only expanding catalog content
+- Treat the local store as a lightweight study operating system with goals,
+  bookmarks, review queues, and streaks
+- Keep UI panels selector-driven so new analytics and planning surfaces remain
+  easy to test and refactor
