@@ -9,6 +9,7 @@ SP//OS is a production-oriented Next.js learning platform for stochastic process
 - Shared config, observability, and route error handling
 - Zustand-powered client state with live progress updates
 - Searchable topic navigation with activity and mastery highlights
+- Study planner with daily goals, streaks, bookmarks, and review queues
 - Unit tests for core learning domain logic
 - GitHub Actions CI, Docker build support, and repository standards docs
 
@@ -95,4 +96,5 @@ For a fuller breakdown, see [`docs/architecture.md`](./docs/architecture.md) and
 - Replace the in-memory repository with persistent storage
 - Add authenticated learner profiles
 - Expand analytics and simulation fidelity
+- Add calendar-aware planning and cross-device persistence
 - Introduce end-to-end tests for the App Router flows
