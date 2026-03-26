@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Problem } from "@/features/learning/domain/types";
 import { useLearningStore } from "@/features/learning/store";
 export function ProblemEngine({ problems }: { problems: Problem[] }) {
@@ -10,13 +10,34 @@ export function ProblemEngine({ problems }: { problems: Problem[] }) {
   const markProblemSolved = useLearningStore(
     (state) => state.markProblemSolved
   );
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "unattempted" | "solved" | "needs reinforcement"
+  >("all");
 
   const grouped = useMemo(() => {
-    return problems.reduce<Record<string, Problem[]>>((acc, problem) => {
+    const filteredProblems = problems.filter((problem) => {
+      const solved = solvedProblems[problem.id];
+
+      if (statusFilter === "all") {
+        return true;
+      }
+
+      if (statusFilter === "unattempted") {
+        return solved === undefined;
+      }
+
+      if (statusFilter === "solved") {
+        return solved === true;
+      }
+
+      return solved === false;
+    });
+
+    return filteredProblems.reduce<Record<string, Problem[]>>((acc, problem) => {
       acc[problem.level] = [...(acc[problem.level] ?? []), problem];
       return acc;
     }, {});
-  }, [problems]);
+  }, [problems, solvedProblems, statusFilter]);
 
   if (problems.length === 0) {
     return (
@@ -28,6 +49,19 @@ export function ProblemEngine({ problems }: { problems: Problem[] }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap gap-3">
+        {(["all", "unattempted", "solved", "needs reinforcement"] as const).map(
+          (filter) => (
+            <button
+              key={filter}
+              className={`pill ${statusFilter === filter ? "text-text" : ""}`}
+              onClick={() => setStatusFilter(filter)}
+            >
+              {filter}
+            </button>
+          )
+        )}
+      </div>
       {Object.entries(grouped).map(([level, entries]) => (
         <section
           key={level}
@@ -123,6 +157,11 @@ export function ProblemEngine({ problems }: { problems: Problem[] }) {
           </div>
         </section>
       ))}
+      {Object.keys(grouped).length === 0 ? (
+        <div className="glass-panel rounded-[var(--radius-lg)] p-6 text-sm leading-7 text-textMuted">
+          No problems match the current status filter.
+        </div>
+      ) : null}
     </div>
   );
 }
