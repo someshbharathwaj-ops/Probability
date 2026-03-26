@@ -2,6 +2,7 @@ import {
   type LearnerProfile,
   type LearningActivity,
   type Problem,
+  type SimulationStatus,
   type SimulationDefinition,
   type Topic,
   type TopicMastery,
@@ -35,14 +36,14 @@ export function buildHeroStats(
       detail: "Average confidence across the learning graph.",
     },
     {
-      label: "Weak Areas",
-      value: String(profile.weakAreas.length),
-      detail: "Topics currently prioritized for reinforcement.",
+      label: "Streak",
+      value: `${profile.currentStreak}d`,
+      detail: "Consecutive study days recorded in the local workspace.",
     },
     {
-      label: "Problems",
-      value: String(problems.length),
-      detail: "Prompt bank available for guided practice.",
+      label: "Daily Goal",
+      value: `${profile.todayMinutes}/${profile.dailyGoalMinutes}m`,
+      detail: "Minutes logged against the current daily study target.",
     },
     {
       label: "Ready Labs",
@@ -86,4 +87,50 @@ export function buildRecentActivity(activityFeed: LearningActivity[]) {
         new Date(right.timestamp).getTime() - new Date(left.timestamp).getTime()
     )
     .slice(0, 6);
+}
+
+export function buildBookmarkedTopics(profile: LearnerProfile, topics: Topic[]) {
+  return profile.bookmarkedTopics
+    .map((topicId) => topics.find((topic) => topic.id === topicId))
+    .filter((topic): topic is Topic => Boolean(topic));
+}
+
+export function buildReviewTopics(profile: LearnerProfile, topics: Topic[]) {
+  return profile.reviewQueue
+    .map((topicId) => topics.find((topic) => topic.id === topicId))
+    .filter((topic): topic is Topic => Boolean(topic));
+}
+
+export function buildGoalSummary(profile: LearnerProfile) {
+  const progress = Math.min(
+    1,
+    profile.dailyGoalMinutes === 0
+      ? 0
+      : profile.todayMinutes / profile.dailyGoalMinutes
+  );
+
+  return {
+    progress,
+    remainingMinutes: Math.max(0, profile.dailyGoalMinutes - profile.todayMinutes),
+    sessionsToWeeklyTarget: Math.max(
+      0,
+      profile.weeklyGoalSessions - Math.min(profile.totalSessions, profile.weeklyGoalSessions)
+    ),
+  };
+}
+
+export function buildSimulationStatusCounts(
+  simulations: SimulationDefinition[]
+): Record<SimulationStatus, number> {
+  return simulations.reduce<Record<SimulationStatus, number>>(
+    (acc, simulation) => {
+      acc[simulation.status] += 1;
+      return acc;
+    },
+    {
+      ready: 0,
+      scaffolded: 0,
+      planned: 0,
+    }
+  );
 }
