@@ -1,13 +1,20 @@
 import { ConceptModule } from "@/features/learning/components/learning/concept-module";
 import { FormulaCard } from "@/features/learning/components/learning/formula-card";
+import { TopicActions } from "@/features/learning/components/learning/topic-actions";
 import { FormulaCardItem, Topic } from "@/features/learning/domain/types";
 
 export function TopicPage({
   topic,
   formulas,
+  isBookmarked,
+  isCompleted,
+  onToggleBookmark,
 }: {
   topic: Topic;
   formulas: FormulaCardItem[];
+  isBookmarked: boolean;
+  isCompleted: boolean;
+  onToggleBookmark: (topicId: Topic["id"]) => void;
 }) {
   return (
     <section className="space-y-6">
@@ -29,6 +36,12 @@ export function TopicPage({
           )}
         </div>
       </div>
+      <TopicActions
+        topic={topic}
+        isBookmarked={isBookmarked}
+        isCompleted={isCompleted}
+        onToggleBookmark={onToggleBookmark}
+      />
       <ConceptModule topic={topic} />
       {formulas.length > 0 ? (
         <div className="grid gap-4 xl:grid-cols-2">
